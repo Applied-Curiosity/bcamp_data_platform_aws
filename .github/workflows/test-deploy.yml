@@ -17,7 +17,7 @@ jobs:
         uses: aws-actions/configure-aws-credentials@v3
         with:
           role-to-assume: arn:aws:iam::768789442519:oidc-provider/token.actions.githubusercontent.com
-          role-session-name: samplerolesession
+          role-session-name: github-oidc-connect
           aws-region: us-east-2
       # Upload a file to AWS s3
       #- name:  Copy index.html to s3
