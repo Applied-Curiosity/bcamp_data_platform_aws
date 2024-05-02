@@ -7,12 +7,21 @@ As we continue to expand our skills in cloud architecture and infrastructure man
 
 1. **Create a New Git Repository:**
 Begin by creating a new repository specifically for our AWS infrastructure. This will be the central place for all related code and documentation. ***I’ve already created a GitHub repo for AWS titled, `bcamp_data_platform_aws`***
-2. **Install Pulumi and AWS CLI:** 
-Ensure you have Pulumi installed. Additionally, install the AWS CLI as it's crucial for interacting with AWS services directly.
+2. **Install Pulumi and AWS CLI:**
+I created a new branch off main (ghaws) for my Codespace work environment. 
+I installed pulumi using the following code: curl -fsSL https://get.pulumi.com | sh
+I installed AWS CLI using codes:
+curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
+unzip awscliv2.zip
+sudo ./aws/install 
 3. **Configure AWS CLI:**
 Configure the AWS CLI with appropriate credentials. This involves setting up AWS access keys and configuring your local environment to interact with your AWS account. ***If there is a OpenID option similar to Azure, let’s try to use that.***
 4. **Set Up a Pulumi Project:**
 Create a new Pulumi project in the **`infra`** directory of your repository, but this time, make sure it's configured for AWS.
+First I checked my version to make sure I had the latest installed by tuping aws --version
+Then I made a new directory called "infra" mkdir infra - then switched to that directory cd infra
+To initilize a new Pumulmi project I ran - pulumi new aws-python
+ISSUE - wants tokens?? Stop here ask questions
 5. **Authenticate Pulumi with AWS:**
 Instead of a service principal, you'll need to configure Pulumi to use AWS credentials. Investigate the best practices for securely managing these credentials, especially in CI/CD environments.
 6. **Create GitHub Actions Workflow:**
