@@ -67,3 +67,51 @@ pulumi version
 
 Again, this `.devcontainer` includes Python, Pip, and a bunch of other tools, but if you need to do it on your own, I suggest you install it from the VSCODE extension library. And remember, when creating your virtual environment, if you create it from the command line, which Pulumi will do for you if you choose to scaffold a project, you will need to set your environment through VSCODE's command pallet.
 [Basically, how it's done here](https://code.visualstudio.com/docs/python/environments#_create-a-conda-environment-in-the-terminal)
+
+If you need to perform a local install, this should help you. [Local Python Install](https://www.pulumi.com/docs/clouds/aws/get-started/begin/#install-language-runtime)
+
+### [Configure Pulumi to Access your AWS Account](https://www.pulumi.com/docs/clouds/aws/get-started/begin/#configure-pulumi-to-access-your-aws-account)
+
+I did have a slight scare when I realized that AWS and GCP do not have a provider as part of their Native client, the way that Azure does. No worries, though, there is a way to set up both with Pulumi, we just may need to jump through a few additional hoops.
+
+[Databricks set up on AWS](https://www.pulumi.com/registry/packages/databricks/api-docs/mwsworkspaces/#creating-a-databricks-on-aws-workspace) We are currently focusing our efforts on the Databricks managed VPC, instead of the customer provided VPC (that will be a future implementation). We will do this for all 3 environments. This will mean that the elements we're creating in addition to Databricks are the Storage Account and the Key Vault, as well as the IAM requirements.
+
+[Install the AWS CLI](https://docs.aws.amazon.com/cli/latest/userguide/getting-started-install.html)
+
+```
+curl "https://awscli.amazonaws.com/awscli-exe-linux-aarch64.zip" -o "awscliv2.zip"
+unzip awscliv2.zip
+sudo ./aws/install
+```
+
+**_At some point in the future, we will make this part of the `.devcontainer`._**
+
+## AWS CLI Setup Instructions
+
+Follow these steps to configure your AWS CLI:
+
+1. **Get your AWS Access Key ID and Secret Access Key**
+
+   - Sign in to the AWS Management Console and open the IAM console at https://console.aws.amazon.com/iam/.
+   - In the navigation pane, choose Users and then choose Add user.
+   - For User name, type a name for the new user. This is the name they'll use to sign in to AWS.
+   - Select the check box next to Programmatic access.
+   - Choose Next: Permissions.
+   - On the Set permissions page, choose Attach existing policies directly.
+   - In the policy list, select the check box for `AdministratorAccess`. Then choose Next: Tags.
+   - Choose Next: Review to see the user details and permissions.
+   - Choose Create user.
+   - To view the new access key pair, choose Show. You will not have access to the secret access key again after this dialog box closes.
+   - To download the key pair, choose Download .csv file. Store the keys in a secure location.
+
+2. **Configure your AWS CLI**
+
+   - Open your terminal.
+   - Run `aws configure`.
+   - You will be prompted to provide your AWS Access Key ID, AWS Secret Access Key, Default region name, and Default output format. Enter your details and press enter after each one.
+
+3. **Test your AWS CLI configuration**
+
+   - Run `aws s3 ls` in your terminal. If your AWS CLI is properly configured, you should see a list of your S3 buckets.
+
+Remember, never share your AWS Access Key ID and Secret Access Key with anyone, and avoid committing them in your code or uploading them to public repositories.
