@@ -1,10 +1,10 @@
-name: my-serverless-app
+name: bcamp_data_platform_aws
 runtime:
   name: python
   options:
     virtualenv: venv
-description: 'stack name: (dev1)'
+description: Our BCAMP AWS Databricks Intelligent Platform
 config:
   pulumi:tags:
     value:
-      pulumi:template: serverless-aws-python
+      pulumi:template: ""
