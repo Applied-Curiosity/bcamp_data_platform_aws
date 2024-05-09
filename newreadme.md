@@ -115,3 +115,33 @@ Follow these steps to configure your AWS CLI:
    - Run `aws s3 ls` in your terminal. If your AWS CLI is properly configured, you should see a list of your S3 buckets.
 
 Remember, never share your AWS Access Key ID and Secret Access Key with anyone, and avoid committing them in your code or uploading them to public repositories.
+
+## A New Pulumi Project
+
+When starting fresh, the easiest way to align the AWS local authentication, the Pulumi authentication, and the overall workflow is to create a new Pulumi project.
+
+For our project I used the scaffolding option:
+
+```
+pulumi new --name bcamp_data_platform_aws
+```
+
+This create a new project in Pulumi and started me down the path of creating the project. Not that I emptied the `infra` folder and changed directory to it.
+
+Pulumi then walked me through each step including a description of the project, the template I wanted to use (I chose the aws-native-python), the AWS region we want to deploy to `east-us-1`, and finally the stack name, which I chose `dev`.
+
+After the project was created, I was able to perform `pulumi up` and use the `display` option to see that the `my-bucket` resource. So I went ahead and let it do the deployment.
+
+### Some additional thoughts for developers
+
+As a devloper using this environment, you shouldn't need to install any additional tools. They are all included in the `.devcontainer.json` file and Docker file.
+
+However, you will need to configure your own AWS cli authentication. This involves created a `.env' file in the root directory that includes the values for your authentication for AWS.
+
+```
+AWS_ACCESS_KEY_ID=<>
+AWS_SECRET_ACCESS_KEY=<>
+PULUMI_TOKEN=<>
+```
+
+Replace the <> with your values, the Pulumi value is optional.
