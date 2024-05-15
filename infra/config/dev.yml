@@ -1,0 +1,19 @@
+iam:
+  roles:
+    - name: DatabricksIAMRole
+      assume_role_policy: |
+        {
+          "Version": "2012-10-17",
+          "Statement": [
+            {
+              "Effect": "Allow",
+              "Principal": {"Service": "ec2.amazonaws.com"},
+              "Action": "sts:AssumeRole"
+            }
+          ]
+        }
+      policies:
+        - arn: "arn:aws:iam::aws:policy/AmazonS3FullAccess"
+        - arn: "arn:aws:iam::aws:policy/AmazonEC2FullAccess"
+  outputs:
+    role_arns: []

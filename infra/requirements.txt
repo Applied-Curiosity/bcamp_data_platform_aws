@@ -1,2 +1,12 @@
-pulumi>=3.0.0,<4.0.0
-pulumi-aws-native>=0.8.0,<1.0.0
+Arpeggio==2.0.2
+attrs==23.2.0
+dill==0.3.8
+grpcio==1.60.1
+parver==0.5
+protobuf==4.25.3
+pulumi==3.115.2
+pulumi_aws==6.35.0
+pulumi_aws_native==0.105.0
+PyYAML==6.0.1
+semver==2.13.0
+six==1.16.0
