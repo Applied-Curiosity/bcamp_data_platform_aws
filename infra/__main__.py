@@ -1,35 +1,53 @@
-import json
 import pulumi
-import pulumi_aws as aws
-import pulumi_aws_apigateway as apigateway
+from dto import ConfigDTO
+import yaml
+import os
 
-# An execution role to use for the Lambda function
-role = aws.iam.Role("role", 
-    assume_role_policy=json.dumps({
-        "Version": "2012-10-17",
-        "Statement": [{
-            "Action": "sts:AssumeRole",
-            "Effect": "Allow",
-            "Principal": {
-                "Service": "lambda.amazonaws.com",
-            },
-        }],
-    }),
-    managed_policy_arns=[aws.iam.ManagedPolicy.AWS_LAMBDA_BASIC_EXECUTION_ROLE])
+# Import resource classes
+from resources.iam import IAMResource
+from resources.vpc import VPCResource
+from resources.security import SecurityResource
+from resources.storage import S3Resource
+from resources.databricks import DatabricksResource
+from resources.privatelink import PrivateLinkResource
+from resources.kms import KMSResource
+from resources.monitoring import MonitoringResource
+from resources.bastion import BastionResource
+from resources.connectivity import ConnectivityResource
+from resources.compliance import ComplianceResource
 
-# A Lambda function to invoke
-fn = aws.lambda_.Function("fn",
-    runtime="python3.9",
-    handler="handler.handler",
-    role=role.arn,
-    code=pulumi.FileArchive("./function"))
+# Load configuration based on the current Pulumi stack
+stack = pulumi.get_stack()
+config_path = f'config/{stack}.yml'
 
-# A REST API to route requests to HTML content and the Lambda function
-api = apigateway.RestAPI("api",
-  routes=[
-    apigateway.RouteArgs(path="/", local_path="www"),
-    apigateway.RouteArgs(path="/date", method=apigateway.Method.GET, event_handler=fn)
-  ])
+with open(config_path, 'r') as file:
+    config_data = yaml.safe_load(file)
 
-# The URL at which the REST API will be served.
-pulumi.export("url", api.url)
+# Create DTOs from configuration
+config_dto = ConfigDTO.from_dict(config_data)
+
+# Instantiate resources with DTO
+iam_resource = IAMResource(config_dto.iam)
+vpc_resource = VPCResource(config_dto.vpc)
+security_resource = SecurityResource(config_dto.security)
+storage_resource = S3Resource(config_dto.storage)
+databricks_resource = DatabricksResource(config_dto.databricks)
+privatelink_resource = PrivateLinkResource(config_dto.privatelink)
+kms_resource = KMSResource(config_dto.kms)
+monitoring_resource = MonitoringResource(config_dto.monitoring)
+bastion_resource = BastionResource(config_dto.bastion)
+connectivity_resource = ConnectivityResource(config_dto.connectivity)
+compliance_resource = ComplianceResource(config_dto.compliance)
+
+# Export any necessary outputs
+pulumi.export('iam_outputs', iam_resource.output_dto().outputs)
+pulumi.export('vpc_outputs', vpc_resource.output_dto().outputs)
+pulumi.export('security_outputs', security_resource.output_dto().outputs)
+pulumi.export('storage_outputs', storage_resource.output_dto().outputs)
+pulumi.export('databricks_outputs', databricks_resource.output_dto().outputs)
+pulumi.export('privatelink_outputs', privatelink_resource.output_dto().outputs)
+pulumi.export('kms_outputs', kms_resource.output_dto().outputs)
+pulumi.export('monitoring_outputs', monitoring_resource.output_dto().outputs)
+pulumi.export('bastion_outputs', bastion_resource.output_dto().outputs)
+pulumi.export('connectivity_outputs', connectivity_resource.output_dto().outputs)
+pulumi.export('compliance_outputs', compliance_resource.output_dto().outputs)
