@@ -1,8 +1,16 @@
 # resources/iam.py
-import pulumi_aws as aws
-from dto import IAMConfigDTO
 
-# ty working on python pathing issue
+from pathlib import Path
+import sys
+import importlib.util
+
+# ty working on pathing issue
+site_package_dir = Path('/workspaces/bcamp_data_platform_aws/infra/venv/lib64/python3.10/site-packages')
+sys.path.append(str(site_package_dir)) # append path with site dependencies to the main path
+
+
+import pulumi_aws as aws # still gives issue with grpc
+from dto import IAMConfigDTO
 
 class IAMResource:
     def __init__(self, config: IAMConfigDTO):
