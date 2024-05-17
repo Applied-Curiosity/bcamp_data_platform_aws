@@ -2,6 +2,8 @@
 import pulumi_aws as aws
 from dto import IAMConfigDTO
 
+# ty working on python pathing issue
+
 class IAMResource:
     def __init__(self, config: IAMConfigDTO):
         self.config = config
