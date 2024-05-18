@@ -1,4 +1,3 @@
-# resources/vpc.py
 import pulumi_aws as aws
 from dto import VPCConfigDTO
 
@@ -30,3 +29,4 @@ class VPCResource:
 
     def output_dto(self) -> VPCConfigDTO:
         return self.config
+
