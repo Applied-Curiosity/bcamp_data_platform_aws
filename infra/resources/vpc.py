@@ -1,3 +1,4 @@
+# VPC Resource Class
 import pulumi_aws as aws
 from dto import VPCConfigDTO
 
