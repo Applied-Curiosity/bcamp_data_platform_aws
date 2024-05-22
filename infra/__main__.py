@@ -29,7 +29,6 @@ config_dto = ConfigDTO.from_dict(config_data)
 
 # Instantiate resources with DTO
 iam_resource = IAMResource(config_dto.iam)
-
 vpc_resource = VPCResource(config_dto.vpc)
 security_resource = SecurityResource(config_dto.security)
 storage_resource = S3Resource(config_dto.storage)
@@ -53,4 +52,3 @@ pulumi.export('monitoring_outputs', monitoring_resource.output_dto().outputs)
 pulumi.export('bastion_outputs', bastion_resource.output_dto().outputs)
 pulumi.export('connectivity_outputs', connectivity_resource.output_dto().outputs)
 pulumi.export('compliance_outputs', compliance_resource.output_dto().outputs)
-
