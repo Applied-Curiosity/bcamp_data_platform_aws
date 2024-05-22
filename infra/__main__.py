@@ -5,7 +5,6 @@ import os
 
 # Import resource classes
 from resources.iam import IAMResource
-
 from resources.vpc import VPCResource
 from resources.security import SecurityResource
 from resources.storage import S3Resource
