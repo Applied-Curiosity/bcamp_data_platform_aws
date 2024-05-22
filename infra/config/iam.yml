@@ -1,15 +1,25 @@
-# resources/iam.py
+iam:
+  roles:
+    - name: DatabricksIAMRole
+      assume_role_policy: |
+        {
+          "Version": "2012-10-17",
+          "Statement": [
+            {
+              "Effect": "Allow",
+              "Principal": {"Service": "ec2.amazonaws.com"},
+              "Action": "sts:AssumeRole"
+            }
+          ]
+        }
+      policies:
+        - arn: "arn:aws:iam::aws:policy/AmazonS3FullAccess"
+        - arn: "arn:aws:iam::aws:policy/AmazonEC2FullAccess"
+  outputs:
+    role_arns: []
 
-from pathlib import Path
-import sys
-import importlib.util
-
-# ty working on pathing issue
-site_package_dir = Path('/workspaces/bcamp_data_platform_aws/infra/venv/lib64/python3.10/site-packages')
-sys.path.append(str(site_package_dir)) # append path with site dependencies to the main path
-
-
-import pulumi_aws as aws # still gives issue with grpc
+# IAM Resource Class
+import pulumi_aws as aws
 from dto import IAMConfigDTO
 
 class IAMResource:
@@ -36,3 +46,5 @@ class IAMResource:
 
     def output_dto(self) -> IAMConfigDTO:
         return self.config
+
+#
