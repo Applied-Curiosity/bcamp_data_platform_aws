@@ -1,6 +1,7 @@
+# Configuration for IAM Role
 iam:
   roles:
-    - name: DatabricksIAMRole
+    - name: AWSIAMRole
       assume_role_policy: |
         {
           "Version": "2012-10-17",
@@ -17,3 +18,124 @@ iam:
         - arn: "arn:aws:iam::aws:policy/AmazonEC2FullAccess"
   outputs:
     role_arns: []
+
+# Configuration for AWS S3 Bucket
+storage:
+  s3_buckets:
+    - name: myapp-dev-data
+      region: us-east-1
+      public_access_block: true
+      versioning: true
+      logging:
+        target_bucket: myapp-log-bucket
+        target_prefix: logs/dev/
+      server_side_encryption: AES256
+  outputs:
+    bucket_arns: []
+    bucket_names: []
+
+# Configuration for VPC
+vpc:
+  name: main
+  cidr_block: "10.0.0.0/16"
+  subnets:
+    - name: public-subnet
+      cidr_block: "10.0.1.0/24"
+      availability_zone: "us-east-1a"
+      map_public_ip_on_launch: true
+  internet_gateway: true
+  nat_gateways:
+    - subnet_name: public-subnet
+  outputs:
+    vpc_id: ""
+    subnet_ids: []
+
+# Configuration for AWS Security Group
+security:
+  security_groups:
+    - name: web-server-sg
+      description: "Security group for web servers"
+      vpc_id: "${vpc_id}"  # This will be populated dynamically
+      ingress:
+        - protocol: "tcp"
+          from_port: 80
+          to_port: 80
+          cidr_blocks: ["0.0.0.0/0"]
+      egress:
+        - protocol: "all"
+          from_port: 0
+          to_port: 0
+          cidr_blocks: ["0.0.0.0/0"]
+
+  network_acls:
+    - name: web-acl
+      vpc_id: "${vpc_id}"  # This will be populated dynamically
+      ingress:
+        - rule_no: 100
+          protocol: "tcp"
+          action: "allow"
+          cidr_block: "0.0.0.0/0"
+          from_port: 80
+          to_port: 80
+      egress:
+        - rule_no: 100
+          protocol: "-1"
+          action: "allow"
+          cidr_block: "0.0.0.0/0"
+          from_port: 0
+          to_port: 0
+
+  outputs:
+    security_group_ids: []
+    network_acl_ids: []
+
+# Databricks Workspace Configuration
+databricks:
+  workspace:
+    name: my-databricks-workspace
+    region: us-west-2
+    sku: "standard"
+    managed_resource_group_id: "managed-rg"
+    network:
+      vpc_id: "${vpc_id}"
+      subnet_ids: ["${subnet1_id}", "${subnet2_id}"]
+      security_group_ids: ["${sg_id}"]
+      public_subnet_name: "public-subnet"
+      private_subnet_name: "private-subnet"
+  outputs:
+    workspace_url: ""
+    workspace_id: ""
+
+
+# Configuration for Privatelink
+privatelink:
+  endpoints:
+    - service_name: "com.amazonaws.us-east-1.s3"
+      vpc_id: "${vpc_id}"
+      subnet_ids: ["${subnet_id}"]
+      security_group_ids: ["${sg_id}"]
+  outputs:
+    endpoint_ids: []
+
+# Configuration for AWS Key Management Service(KMS)
+kms:
+  keys:
+    - alias: "alias/myapp-key"
+      description: "Encryption key for myapp"
+      policy: |
+        {
+          "Version": "2012-10-17",
+          "Statement": [
+            {
+              "Effect": "Allow",
+              "Principal": {"AWS": "arn:aws:iam::768789442519:root"}, # Use your AWS Id arn:aws:iam::aws_id:root 
+              "Action": "kms:*",
+              "Resource": "*"
+            }
+          ]
+        }
+  outputs:
+    key_ids: []
+    key_arns: []
+
+

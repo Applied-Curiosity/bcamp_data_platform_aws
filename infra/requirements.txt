@@ -10,3 +10,4 @@ pulumi_aws_native==0.105.0
 PyYAML==6.0.1
 semver==2.13.0
 six==1.16.0
+pulumi-databricks

@@ -1,4 +1,5 @@
-# VPC Resource Class
+# resources/vpc.py
+import pulumi
 import pulumi_aws as aws
 from dto import VPCConfigDTO
 
@@ -16,11 +17,11 @@ class VPCResource:
         subnet_ids = []
         for subnet in self.config.subnets:
             sn = aws.ec2.Subnet(
-                f"{subnet.name}-{self.config.name}",
+                f"{subnet['name']}-{self.config.name}",
                 vpc_id=vpc.id,
-                cidr_block=subnet.cidr_block,
-                availability_zone=subnet.availability_zone,
-                map_public_ip_on_launch=subnet.map_public_ip_on_launch
+                cidr_block=subnet['cidr_block'],
+                availability_zone=subnet['availability_zone'],
+                map_public_ip_on_launch=subnet['map_public_ip_on_launch']
             )
             subnet_ids.append(sn.id)
 
@@ -28,6 +29,9 @@ class VPCResource:
         self.config.outputs['vpc_id'] = vpc.id
         self.config.outputs['subnet_ids'] = subnet_ids
 
+        # Export outputs
+        pulumi.export("vpc_id", vpc.id)
+        pulumi.export("subnet_ids", subnet_ids)
+
     def output_dto(self) -> VPCConfigDTO:
         return self.config
-
