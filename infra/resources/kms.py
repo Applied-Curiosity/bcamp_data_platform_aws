@@ -1,25 +1,5 @@
-# YAML Configuration for KMS
-kms:
-  keys:
-    - alias: "alias/myapp-key"
-      description: "Encryption key for myapp"
-      policy: |
-        {
-          "Version": "2012-10-17",
-          "Statement": [
-            {
-              "Effect": "Allow",
-              "Principal": {"AWS": "arn:aws:iam::123456789012:root"},
-              "Action": "kms:*",
-              "Resource": "*"
-            }
-          ]
-        }
-  outputs:
-    key_ids: []
-    key_arns: []
-
 # resources/kms.py
+import json
 import pulumi_aws as aws
 from dto import KMSConfigDTO
 
@@ -29,25 +9,29 @@ class KMSResource:
         self.setup_keys()
 
     def setup_keys(self):
+        self.key_ids = []
+        self.key_arns = []
+
         for key_config in self.config.keys:
-            key = aws.kms.Key(
-                key_config.alias,
-                description=key_config.description,
-                policy=key_config.policy
+            key_policy = key_config['policy']
+            kms_key = aws.kms.Key(
+                key_config['alias'],
+                description=key_config['description'],
+                policy=key_policy
             )
-            # Alias for the key
-            aws.kms.Alias(
-                key_config.alias,
-                target_key_id=key.id,
-                name=key_config.alias
+
+            # Create an alias for the key
+            alias = aws.kms.Alias(
+                key_config['alias'],
+                target_key_id=kms_key.id
             )
-            # Store output
-            if 'key_ids' not in self.config.outputs:
-                self.config.outputs['key_ids'] = []
-            if 'key_arns' not in self.config.outputs:
-                self.config.outputs['key_arns'] = []
-            self.config.outputs['key_ids'].append(key.id)
-            self.config.outputs['key_arns'].append(key.arn)
+
+            # Store outputs
+            self.key_ids.append(kms_key.id)
+            self.key_arns.append(kms_key.arn)
+
+        self.config.outputs['key_ids'] = self.key_ids
+        self.config.outputs['key_arns'] = self.key_arns
 
     def output_dto(self) -> KMSConfigDTO:
         return self.config
