@@ -9,7 +9,7 @@ from resources.iam import IAMResource
 from resources.storage import S3Resource
 from resources.vpc import VPCResource
 from resources.security import SecurityResource
-# from resources.databricks import DatabricksResource
+from resources.databricks import DatabricksResource
 from resources.privatelink import PrivateLinkResource
 from resources.kms import KMSResource
 # from resources.bastion import BastionResource

@@ -24,7 +24,7 @@ class IAMConfigDTO:
         roles = [IAMRoleConfig(**role) for role in config['roles']]
         outputs = config.get('outputs', {})
         return IAMConfigDTO(roles=roles, outputs=outputs)
-    
+
 # Storage Bucket
 @dataclass
 class S3BucketConfig:
@@ -135,7 +135,7 @@ class DatabricksConfigDTO:
             workspace=DatabricksWorkspaceConfig(**config['workspace']),
             outputs=config.get('outputs', {})
         )
- 
+
 
 # Privatelink DTO class
 @dataclass
@@ -204,10 +204,10 @@ class ConfigDTO:
     storage: StorageConfigDTO
     vpc: VPCConfigDTO
     security: SecurityConfigDTO
-    # databricks: DatabricksConfigDTO
+    databricks: DatabricksConfigDTO
     privatelink: PrivateLinkConfigDTO
     kms: KMSConfigDTO
-    
+
     @staticmethod
     def from_dict(config: dict) -> 'ConfigDTO':
         return ConfigDTO(
@@ -216,7 +216,7 @@ class ConfigDTO:
             storage=StorageConfigDTO(**config['storage']),
             vpc=VPCConfigDTO(**config['vpc']),
             security=SecurityConfigDTO(**config['security']),
-            # databricks=DatabricksConfigDTO(**config['databricks']),
+            databricks=DatabricksConfigDTO(**config['databricks']),
             privatelink=PrivateLinkConfigDTO(**config['privatelink']),
             kms=KMSConfigDTO(**config['kms']),
         )
