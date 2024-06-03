@@ -1,5 +1,4 @@
 # Tags which can be used to group resources
-# Common Tags
 common_tags:
   Environment: dev
   Project: myapp
@@ -15,7 +14,7 @@ common_tags:
 # Configuration for IAM Role
 iam:
   roles:
-    - name: AWSIAMRole
+    - name: AWSIAMDataPlatform
       assume_role_policy: |
         {
           "Version": "2012-10-17",
@@ -30,7 +29,6 @@ iam:
       policies:
         - arn: "arn:aws:iam::aws:policy/AmazonS3FullAccess"
         - arn: "arn:aws:iam::aws:policy/AmazonEC2FullAccess"
-      tags: ${common_tags}
   outputs:
     role_arns: []
 
@@ -45,7 +43,6 @@ storage:
         target_bucket: myapp-log-bucket
         target_prefix: logs/dev/
       server_side_encryption: AES256
-      tags: ${common_tags}
   outputs:
     bucket_arns: []
     bucket_names: []
@@ -59,11 +56,9 @@ vpc:
       cidr_block: "10.0.1.0/24"
       availability_zone: "us-east-1a"
       map_public_ip_on_launch: true
-      tags: ${common_tags}
   internet_gateway: true
   nat_gateways:
     - subnet_name: public-subnet
-      tags: ${common_tags}
   outputs:
     vpc_id: ""
     subnet_ids: []
@@ -124,7 +119,6 @@ databricks:
     workspace_url: ""
     workspace_id: ""
 
-
 # Configuration for Privatelink
 privatelink:
   endpoints:
@@ -135,7 +129,7 @@ privatelink:
   outputs:
     endpoint_ids: []
 
-# Configuration for AWS Key Management Service(KMS)
+# Configuration for AWS Key Management Service (KMS)
 kms:
   keys:
     - alias: "alias/myapp-key"

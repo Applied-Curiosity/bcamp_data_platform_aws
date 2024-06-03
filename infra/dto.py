@@ -1,18 +1,41 @@
 from dataclasses import dataclass, field
 from typing import List, Dict, Optional
 
-# Define individual configuration classes for each resource type
-# @dataclass
-# class IAMConfig:
-#     roles: List[Dict[str, any]]
-#     outputs: Dict[str, List[str]] = field(default_factory=dict)
+# Define the common tagging data class
+@dataclass
+class CommonTags:
+    Environment: str
+    Project: str
+    Owner: str
+    Team: str
+    CostCenter: str
+    Lifecycle: str
+    Application: Optional[str] = None
+    Purpose: Optional[str] = None
+    Compliance: Optional[str] = None
+    ManagedBy: Optional[str] = None
 
-#IAM Role Class
+    def to_dict(self):
+        return {
+            "Environment": self.Environment,
+            "Project": self.Project,
+            "Owner": self.Owner,
+            "Team": self.Team,
+            "CostCenter": self.CostCenter,
+            "Lifecycle": self.Lifecycle,
+            "Application": self.Application,
+            "Purpose": self.Purpose,
+            "Compliance": self.Compliance,
+            "ManagedBy": self.ManagedBy
+        }
+
+# IAM Role Class
 @dataclass
 class IAMRoleConfig:
     name: str
     assume_role_policy: str
     policies: List[str]
+    tags: CommonTags
 
 @dataclass
 class IAMConfigDTO:
@@ -20,8 +43,8 @@ class IAMConfigDTO:
     outputs: Dict[str, List[str]] = field(default_factory=dict)
 
     @staticmethod
-    def from_dict(config: dict) -> 'IAMConfigDTO':
-        roles = [IAMRoleConfig(**role) for role in config['roles']]
+    def from_dict(config: dict, common_tags: CommonTags) -> 'IAMConfigDTO':
+        roles = [IAMRoleConfig(**role, tags=common_tags) for role in config['roles']]
         outputs = config.get('outputs', {})
         return IAMConfigDTO(roles=roles, outputs=outputs)
 
@@ -34,6 +57,7 @@ class S3BucketConfig:
     versioning: bool
     logging: Optional[Dict[str, str]]
     server_side_encryption: str
+    tags: CommonTags
 
 @dataclass
 class StorageConfigDTO:
@@ -41,8 +65,8 @@ class StorageConfigDTO:
     outputs: Dict[str, List[str]] = field(default_factory=dict)
 
     @staticmethod
-    def from_dict(config: dict) -> 'StorageConfigDTO':
-        buckets = [S3BucketConfig(**bucket) for bucket in config['s3_buckets']]
+    def from_dict(config: dict, common_tags: CommonTags) -> 'StorageConfigDTO':
+        buckets = [S3BucketConfig(**bucket, tags=common_tags) for bucket in config['s3_buckets']]
         outputs = config.get('outputs', {})
         return StorageConfigDTO(s3_buckets=buckets, outputs=outputs)
 
@@ -53,6 +77,7 @@ class SubnetConfig:
     cidr_block: str
     availability_zone: str
     map_public_ip_on_launch: bool
+    tags: CommonTags
 
 @dataclass
 class VPCConfigDTO:
@@ -64,8 +89,8 @@ class VPCConfigDTO:
     outputs: Dict[str, List[str]] = field(default_factory=dict)
 
     @staticmethod
-    def from_dict(config: dict) -> 'VPCConfigDTO':
-        subnets = [SubnetConfig(**subnet) for subnet in config['subnets']]
+    def from_dict(config: dict, common_tags: CommonTags) -> 'VPCConfigDTO':
+        subnets = [SubnetConfig(**subnet, tags=common_tags) for subnet in config['subnets']]
         nat_gateways = config.get('nat_gateways', [])
         return VPCConfigDTO(
             name=config['name'],
@@ -91,6 +116,7 @@ class SecurityGroupConfig:
     vpc_id: str
     ingress: List[IngressEgressRule]
     egress: List[IngressEgressRule]
+    tags: CommonTags
 
 @dataclass
 class NetworkAclRule:
@@ -107,15 +133,21 @@ class NetworkAclConfig:
     vpc_id: str
     ingress: List[NetworkAclRule]
     egress: List[NetworkAclRule]
-
+    tags: CommonTags
 @dataclass
 class SecurityConfigDTO:
     security_groups: List[SecurityGroupConfig]
     network_acls: List[NetworkAclConfig]
     outputs: Dict[str, List[str]] = field(default_factory=dict)
 
+    @staticmethod
+    def from_dict(config: dict, common_tags: CommonTags) -> 'SecurityConfigDTO':
+        security_groups = [SecurityGroupConfig(**sg, tags=common_tags) for sg in config['security_groups']]
+        network_acls = [NetworkAclConfig(**acl, tags=common_tags) for acl in config['network_acls']]
+        outputs = config.get('outputs', {})
+        return SecurityConfigDTO(security_groups=security_groups, network_acls=network_acls, outputs=outputs)
 
-# DataBricks Workspace DTO
+# Databricks Workspace DTO
 @dataclass
 class DatabricksWorkspaceConfig:
     name: str
@@ -123,6 +155,7 @@ class DatabricksWorkspaceConfig:
     sku: str
     managed_resource_group_id: str
     network: Dict[str, List[str]]  # Network settings including VPC, subnets, and security groups
+    tags: CommonTags
 
 @dataclass
 class DatabricksConfigDTO:
@@ -130,12 +163,11 @@ class DatabricksConfigDTO:
     outputs: Dict[str, str] = field(default_factory=dict)
 
     @staticmethod
-    def from_dict(config: dict) -> 'DatabricksConfigDTO':
+    def from_dict(config: dict, common_tags: CommonTags) -> 'DatabricksConfigDTO':
         return DatabricksConfigDTO(
-            workspace=DatabricksWorkspaceConfig(**config['workspace']),
+            workspace=DatabricksWorkspaceConfig(**config['workspace'], tags=common_tags),
             outputs=config.get('outputs', {})
         )
-
 
 # Privatelink DTO class
 @dataclass
@@ -144,6 +176,7 @@ class PrivateLinkEndpointConfig:
     vpc_id: str
     subnet_ids: List[str]
     security_group_ids: List[str]
+    tags: CommonTags
 
 @dataclass
 class PrivateLinkConfigDTO:
@@ -151,8 +184,8 @@ class PrivateLinkConfigDTO:
     outputs: Dict[str, List[str]] = field(default_factory=dict)
 
     @staticmethod
-    def from_dict(config: dict) -> 'PrivateLinkConfigDTO':
-        endpoints = [PrivateLinkEndpointConfig(**ep) for ep in config['endpoints']]
+    def from_dict(config: dict, common_tags: CommonTags) -> 'PrivateLinkConfigDTO':
+        endpoints = [PrivateLinkEndpointConfig(**ep, tags=common_tags) for ep in config['endpoints']]
         outputs = config.get('outputs', {})
         return PrivateLinkConfigDTO(endpoints=endpoints, outputs=outputs)
 
@@ -162,6 +195,7 @@ class KMSKeyConfig:
     alias: str
     description: str
     policy: str
+    tags: CommonTags
 
 @dataclass
 class KMSConfigDTO:
@@ -169,12 +203,12 @@ class KMSConfigDTO:
     outputs: Dict[str, List[str]] = field(default_factory=dict)
 
     @staticmethod
-    def from_dict(config: dict) -> 'KMSConfigDTO':
-        keys = [KMSKeyConfig(**key) for key in config['keys']]
+    def from_dict(config: dict, common_tags: CommonTags) -> 'KMSConfigDTO':
+        keys = [KMSKeyConfig(**key, tags=common_tags) for key in config['keys']]
         outputs = config.get('outputs', {})
         return KMSConfigDTO(keys=keys, outputs=outputs)
 
-
+'''
 @dataclass
 class BastionInstanceConfig:
     name: str
@@ -184,6 +218,7 @@ class BastionInstanceConfig:
     vpc_security_group_ids: List[str]
     subnet_id: str
     associate_public_ip_address: bool
+    tags: CommonTags
 
 @dataclass
 class BastionConfigDTO:
@@ -191,15 +226,16 @@ class BastionConfigDTO:
     outputs: dict = field(default_factory=dict)
 
     @staticmethod
-    def from_dict(config: dict) -> 'BastionConfigDTO':
+    def from_dict(config: dict, common_tags: CommonTags) -> 'BastionConfigDTO':
         return BastionConfigDTO(
-            instance=BastionInstanceConfig(**config['instance']),
+            instance=BastionInstanceConfig(**config['instance'], tags=common_tags),
             outputs=config.get('outputs', {})
         )
-
+'''
 # Unified DTO class for entire configuration
 @dataclass
 class ConfigDTO:
+    common_tags: CommonTags
     iam: IAMConfigDTO
     storage: StorageConfigDTO
     vpc: VPCConfigDTO
@@ -207,16 +243,19 @@ class ConfigDTO:
     databricks: DatabricksConfigDTO
     privatelink: PrivateLinkConfigDTO
     kms: KMSConfigDTO
+    # bastion: BastionConfigDTO
 
     @staticmethod
     def from_dict(config: dict) -> 'ConfigDTO':
+        common_tags = CommonTags(**config['common_tags'])
         return ConfigDTO(
-
-            iam=IAMConfigDTO(**config['iam']),
-            storage=StorageConfigDTO(**config['storage']),
-            vpc=VPCConfigDTO(**config['vpc']),
-            security=SecurityConfigDTO(**config['security']),
-            databricks=DatabricksConfigDTO(**config['databricks']),
-            privatelink=PrivateLinkConfigDTO(**config['privatelink']),
-            kms=KMSConfigDTO(**config['kms']),
+            common_tags=common_tags,
+            iam=IAMConfigDTO.from_dict(config['iam'], common_tags),
+            storage=StorageConfigDTO.from_dict(config['storage'], common_tags),
+            vpc=VPCConfigDTO.from_dict(config['vpc'], common_tags),
+            security=SecurityConfigDTO.from_dict(config['security'], common_tags),
+            databricks=DatabricksConfigDTO.from_dict(config['databricks'], common_tags),
+            privatelink=PrivateLinkConfigDTO.from_dict(config['privatelink'], common_tags),
+            kms=KMSConfigDTO.from_dict(config['kms'], common_tags),
+            # bastion=BastionConfigDTO.from_dict(config['bastion'], common_tags),
         )
