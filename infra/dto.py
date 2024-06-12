@@ -85,19 +85,16 @@ class VPCConfigDTO:
     cidr_block: str
     subnets: List[SubnetConfig]
     internet_gateway: bool
-    nat_gateways: List[Dict[str, str]]
     outputs: Dict[str, List[str]] = field(default_factory=dict)
 
     @staticmethod
     def from_dict(config: dict, common_tags: CommonTags) -> 'VPCConfigDTO':
         subnets = [SubnetConfig(**subnet, tags=common_tags) for subnet in config['subnets']]
-        nat_gateways = config.get('nat_gateways', [])
         return VPCConfigDTO(
             name=config['name'],
             cidr_block=config['cidr_block'],
             subnets=subnets,
             internet_gateway=config['internet_gateway'],
-            nat_gateways=nat_gateways,
             outputs=config.get('outputs', {})
         )
 

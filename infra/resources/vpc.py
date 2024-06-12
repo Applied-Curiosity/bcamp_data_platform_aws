@@ -1,22 +1,23 @@
 # resources/vpc.py
 import pulumi
-import pulumi_aws as aws
+from pulumi_aws import ec2
 from dto import VPCConfigDTO
 
-class VPCResource:
-    def __init__(self, config: VPCConfigDTO):
+class VPC:
+    def __init__(self, config):
         self.config = config
-        self.setup_vpc()
 
-    def setup_vpc(self):
-        vpc = aws.ec2.Vpc(self.config.name, cidr_block=self.config.cidr_block)
+        # Create VPC
+        vpc = ec2.Vpc(self.config.name, cidr_block=self.config.cidr_block)
 
-        if self.config.internet_gateway:
-            ig = aws.ec2.InternetGateway(f"{self.config.name}-ig", vpc_id=vpc.id)
+        # Create Internet Gateway and attach it to the VPC
+        ig = ec2.InternetGateway(f"{self.config.name}-ig", vpc_id=vpc.id)
+        ec2.VpcInternetGatewayAttachment(f"{self.config.name}-ig-attachment", vpc_id=vpc.id, internet_gateway_id=ig.id)
 
+        # Create a public and private subnet
         subnet_ids = []
         for subnet in self.config.subnets:
-            sn = aws.ec2.Subnet(
+            sn = ec2.Subnet(
                 f"{subnet['name']}-{self.config.name}",
                 vpc_id=vpc.id,
                 cidr_block=subnet['cidr_block'],
@@ -24,6 +25,16 @@ class VPCResource:
                 map_public_ip_on_launch=subnet['map_public_ip_on_launch']
             )
             subnet_ids.append(sn.id)
+
+            # Create a NAT Gateway in the public subnet
+            if subnet['map_public_ip_on_launch']:
+                eip = ec2.Eip(f"{subnet['name']}-{self.config.name}-eip")
+                nat_gateway = ec2.NatGateway(f"{subnet['name']}-{self.config.name}-nat", subnet_id=sn.id, allocation_id=eip.id)
+
+                # Create a route table for the private subnet
+                route_table = ec2.RouteTable(f"{subnet['name']}-{self.config.name}-rt", vpc_id=vpc.id)
+                ec2.RouteTableAssociation(f"{subnet['name']}-{self.config.name}-rta", subnet_id=sn.id, route_table_id=route_table.id)
+                ec2.Route(f"{subnet['name']}-{self.config.name}-route", route_table_id=route_table.id, destination_cidr_block="0.0.0.0/0", nat_gateway_id=nat_gateway.id)
 
         # Store outputs
         self.config.outputs['vpc_id'] = vpc.id
