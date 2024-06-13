@@ -10,16 +10,16 @@ class S3Resource:
     def create_buckets(self):
         for bucket_config in self.config.s3_buckets:
             bucket = aws.s3.Bucket(
-                bucket_config['name'],
+                bucket_config.name,
                 acl="private",
                 tags={"Environment": "dev"},
                 versioning=aws.s3.BucketVersioningArgs(
-                    enabled=bucket_config['versioning']
+                    enabled=bucket_config.versioning
                 ),
                 server_side_encryption_configuration=aws.s3.BucketServerSideEncryptionConfigurationArgs(
                     rule=aws.s3.BucketServerSideEncryptionConfigurationRuleArgs(
                         apply_server_side_encryption_by_default=aws.s3.BucketServerSideEncryptionConfigurationRuleApplyServerSideEncryptionByDefaultArgs(
-                            sse_algorithm=bucket_config['server_side_encryption']
+                            sse_algorithm=bucket_config.server_side_encryption
                         )
                     )
                 )
